@@ -543,14 +543,20 @@ def main(argv: list) -> int:
         if DIST.exists():
             shutil.rmtree(DIST)
         DIST.mkdir(parents=True, exist_ok=True)
+        broken = []
         for path in sorted(CLIENTS.glob("*.json")):
             try:
                 build(path.stem, DIST)
                 print("  собрано: %s" % path.stem)
             except SystemExit as exc:
                 if exc.code:
-                    fail("клиент %s не собрался" % path.stem)
+                    # один битый клиент не должен скрывать ошибки в остальных
+                    broken.append(path.stem)
+                    print("  ПРОПУЩЕНО: %s (см. ошибку выше)" % path.stem)
         build_index(DIST, dry_run=True)
+        if broken:
+            fail("не собрались: %s. Остальные собраны, но деплой не пойдёт, "
+                 "пока ошибка не исправлена." % ", ".join(broken))
         print("готово: %s" % DIST.relative_to(ROOT))
         return 0
     if not args.slug:
