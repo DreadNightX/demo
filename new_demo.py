@@ -179,6 +179,14 @@ def build(slug: str, out_root: Path, base_url: str = "") -> Path:
     page = page.replace("<!--REVIEWS-->", render_reviews(data.get("reviews") or []))
     page = page.replace("<!--FAQ-->", render_faq(data.get("faq") or []))
     page = page.replace("<!--CREDIT-->", render_credit(data.get("credit") or {}))
+    # {name}/{district} в <title> и <meta description> подставляем ещё при сборке:
+    # тогда превью ссылки в мессенджерах и title вкладки верны и без JS
+    page = page.replace("{name}", esc(data.get("name") or slug))
+    if data.get("district"):
+        page = page.replace("{district}", esc(data["district"]))
+    else:
+        page = page.replace(" в {district}", "").replace("{district}", "вашем городе")
+
     page = page.replace('data-endpoint=""', 'data-endpoint="%s"' % esc(safe_endpoint(data.get("form_endpoint"))))
     page = page.replace('id="entry-form" novalidate', 'id="entry-form" novalidate data-slug="%s"' % esc(slug))
 
