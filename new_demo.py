@@ -353,7 +353,8 @@ def build_index(target: Path = SITE_DIR, dry_run: bool = False) -> None:
     print("%s обновлён: %d демо" % ((target / "index.html").relative_to(ROOT), len(items)))
     if dry_run or target != SITE_DIR:
         return
-    if True:
+    # в режиме GitHub Actions docs/ не публикуется — коммитить нечего
+    if not WORKFLOW.exists():
         git("add", "-A", "--", "docs/index.html")
         if git("diff", "--cached", "--name-only").stdout.strip():
             git("commit", "-m", "demo: обновить список демо")
@@ -425,7 +426,10 @@ def main(argv: list) -> int:
         print("собрано: %s" % out.relative_to(ROOT))
         print("открыть локально: start %s" % (out / "index.html").relative_to(ROOT))
     elif args.command == "publish":
-        publish_repo(args.slug, args.dry_run) if args.per_repo else publish_branch(args.slug, args.dry_run)
+        if args.per_repo:
+            publish_repo(args.slug, args.dry_run)
+        else:
+            publish_branch(args.slug, args.dry_run)
     elif args.command == "delete":
         delete(args.slug, args.yes, args.per_repo)
     return 0
