@@ -521,9 +521,41 @@ def delete(slug: str, confirm: bool, per_repo: bool) -> None:
         print("Отдельный репозиторий удаляется вручную: gh repo delete %s/demo-%s --yes" % (git_owner(), slug))
 
 
+def new_client(slug: str) -> None:
+    """Создать заготовку clients/<slug>.json, чтобы не копировать вручную."""
+    if not SLUG_RE.match(slug):
+        fail("slug должен быть латиницей в нижнем регистре: a-z, 0-9, дефис (2-41 символ).")
+    path = CLIENTS / (slug + ".json")
+    if path.exists():
+        fail("файл уже есть: %s" % path.relative_to(ROOT))
+    CLIENTS.mkdir(parents=True, exist_ok=True)
+    skeleton = {
+        "slug": slug,
+        "name": "",
+        "district": "",
+        "address": "",
+        "phone": "",
+        "hours": "",
+        "noindex": True,
+        "form_endpoint": "",
+        "days": [1, 2, 3, 4, 5, 6],
+        "slots": ["9:00", "10:00", "11:00", "12:00", "13:00",
+                  "14:00", "15:00", "16:00", "17:00", "18:00"],
+        # пустые списки: сборка подставит нейтральные цены и вымышленные отзывы,
+        # а вы замените их на реальные с карточки клиента
+        "prices": [],
+        "reviews": [],
+    }
+    path.write_text(json.dumps(skeleton, ensure_ascii=False, indent=2) + chr(10),
+                      encoding="utf-8", newline=chr(10))
+    print("создан: %s" % path.relative_to(ROOT))
+    print("заполните name, phone, district, address, hours и prices — и запустите:")
+    print("  python new_demo.py publish %s" % slug)
+
+
 def main(argv: list) -> int:
     parser = argparse.ArgumentParser(description="Сборка и публикация демо-сайтов на GitHub Pages")
-    parser.add_argument("command", choices=["build", "publish", "delete", "list", "index", "build-all"])
+    parser.add_argument("command", choices=["new", "build", "publish", "delete", "list", "index", "build-all"])
     parser.add_argument("slug", nargs="?")
     parser.add_argument("--per-repo", action="store_true", help="схема «б»: отдельный репозиторий на клиента")
     parser.add_argument("--dry-run", action="store_true", help="собрать, но не публиковать")
@@ -561,6 +593,10 @@ def main(argv: list) -> int:
         return 0
     if not args.slug:
         parser.error("нужен slug клиента, например: build motor-plus")
+
+    if args.command == "new":
+        new_client(args.slug)
+        return 0
 
     if args.command == "build":
         out = build(args.slug, DIST)
