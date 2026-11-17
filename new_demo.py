@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import re
@@ -298,8 +299,21 @@ def build(slug: str, out_root: Path, base_url: str = "") -> Path:
     if re.search(r"<!--(HEAD|PRICES|REVIEWS|FAQ|CREDIT|DEMO|DEMO-FOOT)-->", page):
         fail("в шаблоне остались незаполненные маркеры — проверьте _templates/site/index.html")
 
+    data_js = render_json_js(data)
+    # Версия в ссылках на скрипты. GitHub Pages отдаёт файлы с Cache-Control max-age=600,
+    # поэтому после обновления демо браузер до десяти минут показывает старый JS —
+    # и страница выглядит «как до правки». С ?v=<хеш> адрес меняется вместе с кодом.
+    digest = hashlib.sha1(
+        (out / "app.js").read_bytes() + (out / "config.js").read_bytes() + data_js.encode("utf-8")
+    ).hexdigest()[:10]
+    for name in ("data.js", "config.js", "app.js"):
+        page = page.replace('<script src="%s"></script>' % name,
+                            '<script src="%s?v=%s"></script>' % (name, digest), 1)
+    page = page.replace('<link rel="stylesheet" href="fonts.css">',
+                        '<link rel="stylesheet" href="fonts.css?v=%s">' % digest, 1)
+
     (out / "index.html").write_text(page, encoding="utf-8", newline="\n")
-    (out / "data.js").write_text(render_json_js(data), encoding="utf-8", newline="\n")
+    (out / "data.js").write_text(data_js, encoding="utf-8", newline="\n")
     # тесты в публикуемом сайте не нужны
     for junk in ("config.test.js", "app.test.js"):
         (out / junk).unlink(missing_ok=True)
