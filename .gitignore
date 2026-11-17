@@ -1,0 +1,12 @@
+# собранные сайты (для режима GitHub Actions они не нужны в git)
+dist/
+# служебное
+__pycache__/
+*.pyc
+shots/
+tmp_*.py
+tmp_*.css
+.env
+
+_proto/
+shots/
