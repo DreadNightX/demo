@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{name} — автосервис в {district}</title>
+<meta name="description" content="Автосервис в {district}: диагностика, ТО, ремонт ходовой и двигателя. Смета до начала работ, гарантия 12 месяцев. Запись по телефону.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#15161A;
+    --bg-2:#1B1D22;
+    --slab:#202228;
+    --ink:#ECEDEB;
+    --ink-2:#B7BAC0;
+    --steel:#82868F;
+    --line:#2E3138;
+    --line-2:#3A3E46;
+    --accent:#FF6A2B;
+    --accent-deep:#E8461D;
+    --accent-soft:#2A1B12;
+    --disp:"Russo One","Arial Black",sans-serif;
+    --sans:"Manrope","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  html,body{overflow-x:clip}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:var(--sans);font-size:15.5px;line-height:1.65;
+  }
+  /* бетонная пыль поверх всей страницы */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  main,header.top,footer.bottom,.callbar{position:relative;z-index:2}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+  /* ---------- шапка ---------- */
+  .top{
+    position:sticky;top:0;z-index:20;
+    background:rgba(21,22,26,.86);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    box-shadow:0 1px 0 var(--line);
+  }
+  .top .wrap{display:flex;align-items:center;gap:16px;min-height:68px}
+  .plate{
+    font-family:var(--disp);font-size:16px;letter-spacing:.06em;
+    border:2px solid var(--line-2);border-radius:7px;
+    padding:6px 10px 4px;line-height:1;white-space:nowrap;color:var(--ink-2);
+  }
+  .plate i{font-style:normal;color:var(--accent);text-shadow:0 0 12px rgba(255,106,43,.6)}
+  .top .who{min-width:0}
+  .top .who b{
+    display:block;font-family:var(--disp);font-weight:400;font-size:15px;line-height:1.3;
+    letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .top .who span{
+    display:block;font-size:12.5px;color:var(--steel);line-height:1.3;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .top .contact{margin-left:auto;text-align:right}
+  .top .contact a{
+    display:block;font-family:var(--disp);font-size:20px;letter-spacing:.04em;line-height:1.15;
+    color:var(--ink);
+  }
+  .top .contact a:hover{color:var(--accent);text-shadow:0 0 14px rgba(255,106,43,.5)}
+  .top .contact small{display:block;font-size:11.5px;color:var(--steel);line-height:1.4}
+  @media(max-width:479px){
+    .plate{display:none}
+    .top .contact a{font-size:17px}
+  }
+
+  /* ---------- хиро: ворота ангара ---------- */
+  .hero{position:relative;isolation:isolate;padding:0}
+  .hero .gate{
+    position:absolute;inset:0;z-index:-1;overflow:hidden;background:var(--bg-2);
+  }
+  .hero .gate img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    filter:grayscale(.35) brightness(.52) contrast(1.15) saturate(1.05);
+  }
+  .hero .gate::after{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(90% 70% at 78% 18%, rgba(232,70,29,.18), transparent 60%),
+      linear-gradient(180deg, rgba(21,22,26,.72) 0%, rgba(21,22,26,.55) 42%, var(--bg) 96%);
+  }
+  .hero .wrap{
+    padding-top:clamp(72px,10vw,128px);
+    padding-bottom:clamp(40px,6vw,72px);
+  }
+  .kick{
+    display:inline-flex;align-items:center;gap:10px;
+    font-weight:700;font-size:12.5px;letter-spacing:.02em;
+    color:var(--accent);border:1px solid rgba(255,106,43,.4);
+    padding:7px 14px;border-radius:999px;margin-bottom:22px;
+    background:rgba(42,27,18,.55);
+  }
+  .kick::before{
+    content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 10px rgba(255,106,43,.9),0 0 2px rgba(255,106,43,1);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{opacity:.45}}
+  .hero h1{
+    font-family:var(--disp);font-weight:400;
+    font-size:clamp(38px,6.8vw,84px);line-height:1.02;letter-spacing:.005em;
+    text-wrap:balance;text-transform:uppercase;max-width:14ch;
+    text-shadow:0 2px 30px rgba(0,0,0,.55);
+  }
+  .hero p.sub{
+    margin-top:20px;max-width:52ch;font-size:16.5px;color:var(--ink-2);
+  }
+  .hero .acts{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:54px;padding:13px 28px;border-radius:10px;
+    font:700 15.5px/1 var(--sans);cursor:pointer;
+    border:2px solid transparent;letter-spacing:.01em;
+    transition:transform .15s,box-shadow .15s,background .12s,color .12s,border-color .12s;
+  }
+  .btn.primary{
+    background:var(--accent-deep);color:#fff;
+    box-shadow:0 0 0 1px rgba(255,106,43,.35),0 8px 28px rgba(232,70,29,.38);
+  }
+  .btn.primary:hover{
+    background:var(--accent);transform:translateY(-2px);
+    box-shadow:0 0 24px rgba(255,106,43,.45),0 12px 30px rgba(232,70,29,.42);
+  }
+  .btn.ghost{background:rgba(32,34,40,.7);border-color:var(--line-2);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+
+  .facts{
+    display:grid;grid-template-columns:repeat(4,auto);gap:8px 0;
+    margin-top:44px;border-top:1px solid var(--line-2);max-width:100%;
+  }
+  .fact{padding:18px 26px 0 0;margin-right:26px;border-right:1px solid var(--line)}
+  .fact:last-child{border-right:0;margin-right:0}
+  .fact b{
+    display:block;font-family:var(--disp);font-weight:400;
+    font-size:30px;line-height:1.05;letter-spacing:.02em;color:var(--ink);
+  }
+  .fact b i{font-style:normal;color:var(--accent);text-shadow:0 0 16px rgba(255,106,43,.55)}
+  .fact span{display:block;margin-top:4px;font-size:12px;color:var(--steel);white-space:nowrap}
+  @media(max-width:760px){
+    .facts{grid-template-columns:1fr 1fr;gap:0}
+    .fact{margin-right:0;padding-right:16px}
+    .fact:nth-child(2n){border-right:0;padding-left:16px}
+    .fact:nth-child(1),.fact:nth-child(2){border-bottom:1px solid var(--line);padding-bottom:16px}
+    .fact:nth-child(n+3){padding-top:14px}
+    .fact:nth-child(2n) span{white-space:normal}
+  }
+
+  /* ---------- контентные секции ---------- */
+  section.block{padding:72px 0}
+  .sec-head{margin-bottom:38px;max-width:60ch}
+  .sec-head h2{
+    font-family:var(--disp);font-weight:400;
+    font-size:clamp(30px,4.4vw,50px);line-height:1.06;letter-spacing:.005em;
+    text-wrap:balance;text-transform:uppercase;
+  }
+  .sec-head h2::after{
+    content:"";display:block;width:64px;height:3px;margin-top:14px;
+    background:var(--accent-deep);box-shadow:0 0 14px rgba(255,106,43,.5);
+  }
+  .sec-head p{margin-top:14px;color:var(--ink-2);font-size:16px}
+
+  /* прайс: сменное табло */
+  .price{
+    border-top:2px solid var(--line-2);
+  }
+  .price-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    padding:10px 2px 12px;border-bottom:1px solid var(--line-2);
+    font-size:11.5px;font-weight:800;letter-spacing:.14em;color:var(--steel);
+  }
+  .pgrid{
+    display:grid;grid-auto-flow:column;grid-template-rows:repeat(4,auto);column-gap:72px;
+  }
+  .prow{
+    display:flex;align-items:baseline;justify-content:space-between;gap:18px;
+    padding:15px 2px 14px;border-bottom:1px solid var(--line);
+    transition:background .12s;
+  }
+  .prow:nth-child(4){border-bottom-color:var(--line-2)}
+  .prow:last-child{border-bottom:0}
+  .prow:hover{background:rgba(255,106,43,.05)}
+  .prow span{color:var(--ink-2)}
+  .prow b{
+    font-family:var(--disp);font-weight:400;font-size:21px;
+    letter-spacing:.03em;white-space:nowrap;color:var(--ink);
+  }
+  .prow b em{font-style:normal;color:var(--accent)}
+  .price-note{margin-top:18px;font-size:13px;color:var(--steel)}
+
+  /* шаги: одна линия потока, не карточки */
+  .steps{
+    position:relative;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:26px;
+    padding-top:34px;
+  }
+  .steps::before{
+    content:"";position:absolute;top:8px;left:0;right:0;height:2px;
+    background:repeating-linear-gradient(90deg,var(--line-2) 0 10px,transparent 10px 18px);
+  }
+  .step{position:relative}
+  .step::before{
+    content:"";position:absolute;top:-30px;left:2px;
+    width:12px;height:12px;border-radius:50%;
+    background:var(--accent-deep);
+    box-shadow:0 0 12px rgba(255,106,43,.8);
+  }
+  .step .num{
+    display:block;font-family:var(--disp);font-weight:400;font-size:52px;line-height:1;
+    color:transparent;-webkit-text-stroke:1.5px rgba(255,106,43,.55);
+  }
+  @supports not (-webkit-text-stroke:1px #000){
+    .step .num{color:rgba(255,106,43,.35)}
+  }
+  .step b{display:block;margin-top:12px;font-size:16px;color:var(--ink)}
+  .step p{margin-top:7px;font-size:13.5px;color:var(--steel)}
+
+  /* галерея: цех в темноте */
+  .shots{
+    display:grid;grid-template-columns:1.35fr 1fr;grid-template-rows:repeat(2,250px);gap:16px;
+  }
+  .shot{
+    position:relative;overflow:hidden;background:var(--bg-2);
+    border:1px solid var(--line);
+  }
+  .shot:first-child{grid-row:1/3}
+  .shot img{
+    display:block;width:100%;height:100%;object-fit:cover;
+    filter:grayscale(.5) brightness(.62) contrast(1.2);
+    transition:transform .4s ease,filter .3s ease;
+  }
+  .shot:hover img{transform:scale(1.04);filter:grayscale(.15) brightness(.78) contrast(1.15)}
+  .shot::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,transparent 45%,rgba(21,22,26,.88));
+  }
+  .shot figcaption{
+    position:absolute;left:18px;bottom:14px;z-index:1;
+    font-family:var(--disp);font-size:15px;letter-spacing:.05em;color:var(--ink);
+    padding-left:14px;border-left:3px solid var(--accent);
+  }
+
+  /* cta-полоса: бетонная плита с сигнальной кромкой */
+  .cta-band{
+    position:relative;background:var(--slab);
+    border:1px solid var(--line-2);
+    padding:38px 40px;
+    display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;
+    box-shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  .cta-band::before{
+    content:"";position:absolute;top:-1px;left:-1px;right:-1px;height:8px;
+    background:repeating-linear-gradient(-45deg,var(--accent-deep) 0 16px,#26150C 16px 32px);
+  }
+  .cta-band h2{
+    font-family:var(--disp);font-weight:400;
+    font-size:clamp(26px,3.6vw,40px);line-height:1.1;text-transform:uppercase;
+  }
+  .cta-band p{margin-top:8px;color:var(--ink-2);font-size:15px}
+  .cta-band .btn{background:var(--accent-deep);color:#fff;box-shadow:0 0 22px rgba(255,106,43,.35)}
+  .cta-band .btn:hover{background:var(--accent);transform:translateY(-2px)}
+  .cta-band small{display:block;margin-top:8px;font-size:12px;color:var(--steel)}
+
+  /* почему нам: реестр, не карточки */
+  .why{border-top:2px solid var(--line-2)}
+  .why > div{
+    display:grid;grid-template-columns:72px 1fr;gap:20px;align-items:start;
+    padding:24px 2px;border-bottom:1px solid var(--line);
+  }
+  .why .idx{
+    font-family:var(--disp);font-size:26px;line-height:1.15;color:var(--accent);
+    text-shadow:0 0 14px rgba(255,106,43,.4);
+  }
+  .why b{display:block;font-size:16.5px;line-height:1.35;color:var(--ink)}
+  .why p{margin-top:7px;font-size:14.5px;color:var(--ink-2)}
+  @media(min-width:761px){
+    .why{display:grid;grid-template-columns:1fr 1fr;column-gap:56px}
+    .why > div:nth-child(odd){border-right:1px solid var(--line);padding-right:28px}
+    .why > div:nth-child(even){padding-left:28px}
+    .why > div:nth-child(n+3){border-bottom:0}
+    .why > div:nth-child(2){border-bottom:1px solid var(--line)}
+  }
+
+  /* отзывы: крупная цитата + две поменьше */
+  .reviews{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}
+  .review{
+    position:relative;background:var(--bg-2);border:1px solid var(--line);
+    padding:24px 24px 20px;
+  }
+  .review::before{
+    content:"”";position:absolute;top:-6px;right:16px;
+    font-family:var(--disp);font-size:64px;line-height:1;color:var(--accent);
+    opacity:.85;text-shadow:0 0 18px rgba(255,106,43,.45);
+  }
+  .review p{font-size:14.5px;color:var(--ink-2);position:relative;max-width:52ch}
+  .review footer{margin-top:14px;font-size:13px;color:var(--steel)}
+  .review footer b{color:var(--ink)}
+  .review.lead{
+    grid-row:1/3;
+    display:flex;flex-direction:column;justify-content:center;
+    border-left:3px solid var(--accent);
+  }
+  .review.lead p{font-size:19px;line-height:1.55;color:var(--ink)}
+
+  /* FAQ */
+  .faq{max-width:72ch}
+  .faq details{
+    background:var(--bg-2);border:1px solid var(--line);
+    padding:0 20px;margin-bottom:10px;
+  }
+  .faq details[open]{border-color:rgba(255,106,43,.4)}
+  .faq summary{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;
+    padding:16px 0;font-weight:700;font-size:15.5px;cursor:pointer;list-style:none;
+    color:var(--ink);
+  }
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{
+    content:"+";font-family:var(--disp);font-size:24px;line-height:1;color:var(--accent);
+    transition:transform .15s;
+  }
+  .faq details[open] summary::after{content:"–"}
+  .faq details p{padding:0 0 16px;max-width:64ch;color:var(--ink-2)}
+
+  /* ---------- запись и контакты ---------- */
+  .entry{display:grid;grid-template-columns:1.08fr .92fr;gap:20px;align-items:start}
+  .card{
+    background:var(--bg-2);border:1px solid var(--line);
+    padding:30px 30px 28px;
+  }
+  .field{margin-bottom:14px}
+  .field label{display:block;font-weight:700;font-size:13.5px;margin-bottom:6px;color:var(--ink)}
+  .field label i{font-style:normal;color:var(--accent)}
+  .field input,.field textarea{
+    width:100%;background:#141519;border:1.5px solid var(--line-2);border-radius:8px;
+    padding:12px 14px;font:inherit;color:var(--ink);
+    transition:border-color .12s,box-shadow .12s;
+  }
+  .field input::placeholder,.field textarea::placeholder{color:#6A6E77}
+  .field input:focus,.field textarea:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(255,106,43,.18),0 0 18px rgba(255,106,43,.15);
+  }
+  .field textarea{resize:vertical}
+  .field input[aria-invalid="true"]{border-color:var(--accent-deep)}
+  .err{margin-top:6px;font-size:13px;color:var(--accent)}
+  .ok{
+    margin:0 0 14px;background:var(--accent-soft);
+    border:1px solid rgba(255,106,43,.35);
+    border-radius:8px;padding:12px 16px;font-weight:700;color:var(--accent);
+  }
+  .fine{margin-top:12px;font-size:12px;color:var(--steel)}
+  .btn[disabled]{opacity:.55;cursor:default;transform:none!important}
+  .find b{
+    display:block;font-family:var(--disp);font-weight:400;font-size:22px;
+    letter-spacing:.03em;text-transform:uppercase;margin-bottom:14px;
+  }
+  .find p{margin-bottom:10px;color:var(--ink-2)}
+  .find a{
+    font-family:var(--disp);font-size:20px;letter-spacing:.04em;color:var(--ink);
+  }
+  .find a:hover{color:var(--accent);text-shadow:0 0 14px rgba(255,106,43,.5)}
+  .find .muted{font-size:13px;color:var(--steel)}
+
+  /* ---------- футер ---------- */
+  .bottom{
+    margin-top:24px;border-top:1px solid var(--line);
+    background:#101115;color:var(--steel);padding:30px 0;
+  }
+  .bottom .wrap{
+    display:flex;justify-content:space-between;align-items:baseline;
+    gap:12px;flex-wrap:wrap;font-size:13px;
+  }
+  .bottom b{color:var(--ink);font-family:var(--disp);font-weight:400;letter-spacing:.03em}
+  .bottom a{font-family:var(--disp);font-size:19px;letter-spacing:.03em;color:var(--ink)}
+  .bottom a:hover{color:var(--accent)}
+
+  /* фиксированная кнопка звонка — только на узких экранах */
+  .callbar{
+    display:none;position:fixed;bottom:0;left:0;right:0;z-index:10;
+    min-height:56px;align-items:center;justify-content:center;
+    background:var(--accent-deep);color:#fff;
+    font:700 16px/1 var(--sans);letter-spacing:.02em;text-align:center;
+    box-shadow:0 -10px 30px rgba(0,0,0,.5),0 -2px 0 rgba(255,106,43,.4);
+  }
+
+  @media(max-width:960px){
+    .shots{grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,210px)}
+    .pgrid{column-gap:40px}
+    .steps{grid-template-columns:1fr 1fr;gap:28px 20px}
+  }
+  @media(max-width:760px){
+    .price-head{display:none}
+    .pgrid{grid-auto-flow:row}
+    .prow:nth-child(4){border-bottom:1px solid var(--line-2)}
+    .steps{grid-template-columns:1fr 1fr}
+    .reviews{grid-template-columns:1fr}
+    .review.lead{grid-row:auto}
+    .entry{grid-template-columns:1fr}
+    .cta-band{padding:28px 24px}
+    section.block{padding:48px 0}
+  }
+  @media(max-width:699px){
+    .callbar{display:flex}
+    body{padding-bottom:56px}
+  }
+  @media(max-width:479px){
+    .steps{grid-template-columns:1fr}
+    .shots{grid-template-columns:1fr;grid-template-rows:repeat(3,200px)}
+    .shot:first-child{grid-row:auto}
+    .fact{padding-right:8px}
+  }
+
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{
+    outline:3px solid var(--accent);outline-offset:2px;
+  }
+  section[id]{scroll-margin-top:88px}
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="plate" aria-hidden="true"><i>77</i> RUS</div>
+    <div class="who">
+      <b data-field="name">ГАРАЖ 12</b>
+      <span>автосервис · <span data-field="district">Коптево</span></span>
+    </div>
+    <div class="contact">
+      <a href="tel:+74951204567" data-field="phone">+7 (495) 120-45-67</a>
+      <small data-field="hours">пн–сб 9:00–21:00</small>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="gate" aria-hidden="true">
+      <img src="img/hero.jpg" alt="" width="1600" height="1000">
+    </div>
+    <div class="wrap">
+      <p class="kick">Смена открыта · запись на сегодня и завтра</p>
+      <h1>Честный ремонт без звёздочек в счёте</h1>
+      <p class="sub">
+        Диагностика — 1 000 ₽, смета и цена — до начала работ. Гарантия 12 месяцев
+        в договоре. Свои запчасти — можно, только скажите заранее.
+      </p>
+      <div class="acts">
+        <a class="btn primary" href="#entry">Записаться на осмотр</a>
+        <a class="btn ghost" href="tel:+74951204567" data-field="phone">+7 (495) 120-45-67</a>
+      </div>
+      <dl class="facts">
+        <div class="fact"><b>11</b><span>лет на этом месте</span></div>
+        <div class="fact"><b><i>400+</i></b><span>машин в месяц</span></div>
+        <div class="fact"><b>12 мес</b><span>гарантии</span></div>
+        <div class="fact"><b>4,9</b><span>на Яндекс.Картах</span></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="block" id="price">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Табло цен</h2>
+        <p>Точную цену скажем после осмотра, до начала работ. Ниже — от чего считаем.</p>
+      </div>
+      <div class="price">
+        <div class="price-head"><span>Работа</span><span>Стоимость</span></div>
+        <div class="pgrid">
+          <div class="prow"><span>ТО (масло, фильтры, осмотр)</span><b><em>от</em> 3 500 ₽</b></div>
+          <div class="prow"><span>Диагностика</span><b>1 000 ₽</b></div>
+          <div class="prow"><span>Ходовая</span><b><em>от</em> 2 500 ₽</b></div>
+          <div class="prow"><span>Тормоза</span><b><em>от</em> 2 000 ₽</b></div>
+          <div class="prow"><span>Двигатель</span><b><em>от</em> 5 000 ₽</b></div>
+          <div class="prow"><span>Коробка</span><b><em>от</em> 6 000 ₽</b></div>
+          <div class="prow"><span>Кондиционер</span><b><em>от</em> 1 500 ₽</b></div>
+          <div class="prow"><span>Шиномонтаж</span><b><em>от</em> 1 800 ₽</b></div>
+        </div>
+      </div>
+      <p class="price-note">«От» — потому что цена зависит от машины и износа. Итог согласуем до начала работ.</p>
+    </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>От звонка до выдачи</h2>
+        <p>Четыре шага, без сюрпризов посередине.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="num">01</span>
+          <b>Запись</b>
+          <p>Звонок или форма на сайте. Скажете модель и что беспокоит — подскажем, сколько займёт осмотр.</p>
+        </div>
+        <div class="step">
+          <span class="num">02</span>
+          <b>Диагностика и смета</b>
+          <p>Смотрим машину и называем цену и список работ до начала ремонта. Без осмотра цену не называем.</p>
+        </div>
+        <div class="step">
+          <span class="num">03</span>
+          <b>Согласование</b>
+          <p>Смету правим только с вашего согласия. Нашли что-то ещё — звоним, а не молча меняем.</p>
+        </div>
+        <div class="step">
+          <span class="num">04</span>
+          <b>Ремонт с гарантией</b>
+          <p>Делаем, выдаём заказ-наряд и гарантию 12 месяцев в договоре.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="gallery">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Цех изнутри</h2>
+        <p>Посты для ходовой, двигателя и ТО — работа идёт на виду, машину можно навестить.</p>
+      </div>
+      <div class="shots">
+        <figure class="shot">
+          <img src="img/g1.jpg" alt="Цех с подъёмником и машинами" loading="lazy">
+          <figcaption>Подъёмники и посты</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="img/g2.jpg" alt="Осмотр двигателя под капотом" loading="lazy">
+          <figcaption>Двигатель и диагностика</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="img/g3.jpg" alt="Разобранная машина на подъёмнике" loading="lazy">
+          <figcaption>Ходовая и ремонт</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="why">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Почему нам доверяют машину</h2>
+      </div>
+      <div class="why">
+        <div>
+          <span class="idx">01</span>
+          <div>
+            <b>Гарантия 12 месяцев — в договоре</b>
+            <p>Не «на словах», а в заказ-наряде: если что-то пошло не так по нашей вине — переделываем за свой счёт.</p>
+          </div>
+        </div>
+        <div>
+          <span class="idx">02</span>
+          <div>
+            <b>Мастера со стажем от 5 лет</b>
+            <p>Работу ведёт тот, кто её оценивал, — без передачи машины между руками.</p>
+          </div>
+        </div>
+        <div>
+          <span class="idx">03</span>
+          <div>
+            <b>Запчасти можно свои</b>
+            <p>Не теряете гарантию на работу и не платите наценку. Только скажите заранее — учтём в смете.</p>
+          </div>
+        </div>
+        <div>
+          <span class="idx">04</span>
+          <div>
+            <b>Смета до начала работ</b>
+            <p>«Вскрыли — стало дороже» — не наш жанр. Дороже может стать только после звонка вам.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="reviews">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Что говорят клиенты</h2>
+      </div>
+      <div class="reviews">
+        <article class="review lead">
+          <p>«Обычно жду подвоха, но тут смета совпала с чеком рубль в рубль. Ходовую сделали за день.»</p>
+          <footer><b>Игорь</b>, Kia Rio · на Яндекс.Картах</footer>
+        </article>
+        <article class="review">
+          <p>«Записали на завтра, к обеду уже позвонили с итогом. Никаких „заезжайте — разберёмся“.»</p>
+          <footer><b>Марина</b>, Volkswagen Polo · на Яндекс.Картах</footer>
+        </article>
+        <article class="review">
+          <p>«Привозил свои запчасти — поставили без вопросов и наценки. Уже второй раз обслуживаюсь здесь.»</p>
+          <footer><b>Сергей</b>, Toyota Camry · на Яндекс.Картах</footer>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Частые вопросы</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Как записаться?</summary>
+          <p>Позвоните или оставьте номер в форме ниже — перезвоним в течение 15 минут в рабочее время и подберём удобный слот.</p>
+        </details>
+        <details>
+          <summary>Даёте ли гарантию?</summary>
+          <p>12 месяцев на работы, прописано в заказ-наряде. На запчасти действует гарантия производителя.</p>
+        </details>
+        <details>
+          <summary>Можно ли привезти свои запчасти?</summary>
+          <p>Да. Скажите заранее, чтобы мы учли это в смете. Наценку за «чужие» запчасти не берём.</p>
+        </details>
+        <details>
+          <summary>Как считается стоимость?</summary>
+          <p>Диагностика — 1 000 ₽. Дальше смета по прайсу и результатам осмотра. До вашего согласования — ни одной работы.</p>
+        </details>
+        <details>
+          <summary>Что если ремонт затянется?</summary>
+          <p>Срок называем до начала работ. Если сдвигаем — предупреждаем и объясняем причину, а не «созвонимся позже».</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="call">
+    <div class="wrap">
+      <div class="cta-band">
+        <div>
+          <h2>Машина барахлит? Заложите час на осмотр</h2>
+          <p>Позвоните — скажем, что можно проверить сегодня и сколько это стоит.</p>
+        </div>
+        <div>
+          <a class="btn" href="tel:+74951204567" data-field="phone">+7 (495) 120-45-67</a>
+          <small data-field="hours">пн–сб 9:00–21:00</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="entry">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Записаться на осмотр</h2>
+        <p>Оставьте номер — перезвоним в течение 15 минут в рабочее время.</p>
+      </div>
+      <div class="entry">
+        <form class="card" id="entry-form" novalidate>
+          <div class="field">
+            <label for="f-phone">Телефон <i aria-hidden="true">*</i></label>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder="+7 900 000-00-00">
+            <p class="err" id="f-phone-err" hidden></p>
+          </div>
+          <div class="field">
+            <label for="f-name">Имя</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Как к вам обращаться">
+          </div>
+          <div class="field">
+            <label for="f-car">Машина</label>
+            <input id="f-car" name="car" type="text" placeholder="Марка, модель, год">
+          </div>
+          <div class="field">
+            <label for="f-issue">Что беспокоит</label>
+            <textarea id="f-issue" name="issue" rows="3" placeholder="Стук при торможении, скрип, течь…"></textarea>
+          </div>
+          <p class="ok" id="entry-ok" hidden>Заявка принята, перезвоним в течение 15 минут.</p>
+          <button class="btn primary" id="entry-btn" type="submit">Записаться</button>
+          <p class="fine">Нажимая кнопку, вы соглашаетесь на звонок по указанному номеру. Ничего лишнего не присылаем.</p>
+        </form>
+        <div class="card find">
+          <b>Как нас найти</b>
+          <p data-field="address">ул. Коптевская, 26</p>
+          <p><span data-field="hours">пн–сб 9:00–21:00</span></p>
+          <p><a data-field="phone" href="tel:+74951204567">+7 (495) 120-45-67</a></p>
+          <p class="muted">Мы в <span data-field="district">Коптево</span> — рядом с домом, без заезда на другой конец города.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="bottom">
+  <div class="wrap">
+    <span><b data-field="name">ГАРАЖ 12</b>, <span id="year">2026</span></span>
+    <a data-field="phone" href="tel:+74951204567">+7 (495) 120-45-67</a>
+  </div>
+</footer>
+
+<a class="callbar" href="tel:+74951204567">Позвонить</a>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var cfg = AvsConfig.apply(document, new URLSearchParams(location.search));
+
+  var year = document.getElementById('year');
+  if (year) year.textContent = String(new Date().getFullYear());
+
+  var callbar = document.querySelector('.callbar');
+  if (callbar) callbar.href = 'tel:' + AvsConfig.formatPhone(cfg.phone);
+
+  var form = document.getElementById('entry-form');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var phone = document.getElementById('f-phone');
+      var err = document.getElementById('f-phone-err');
+      if (!AvsConfig.checkPhone(phone.value)) {
+        phone.setAttribute('aria-invalid', 'true');
+        err.hidden = false;
+        err.textContent = 'Нужен телефон — минимум 10 цифр, иначе мы не сможем перезвонить.';
+        phone.focus();
+        return;
+      }
+      phone.removeAttribute('aria-invalid');
+      err.hidden = true;
+      document.getElementById('entry-ok').hidden = false;
+      var btn = document.getElementById('entry-btn');
+      btn.textContent = 'Записал';
+      btn.disabled = true;
+    });
+  }
+})();
+</script>
+</body>
+</html>
