@@ -4,12 +4,15 @@
 (function (global) {
   'use strict';
 
+  /* Дефолты нужны, только если data.js не подключён (открыли шаблон напрямую).
+     Для собранного сайта это неважно: данные всегда приходят из data.js.
+     Намеренно нейтральные — чтобы имя вымышленного сервиса не уехало клиенту. */
   var DEFAULTS = {
-    name: 'ГАРАЖ 12',
-    district: 'Коптево',
-    address: 'ул. Коптевская, 26',
-    phone: '+7 (495) 120-45-67',
-    hours: 'пн–сб 9:00–21:00'
+    name: 'Название сервиса',
+    district: 'вашем районе',
+    address: 'адрес уточняется',
+    phone: '+7 (000) 000-00-00',
+    hours: 'часы работы уточняются'
   };
 
   var FIELDS = ['name', 'district', 'address', 'phone', 'hours'];
@@ -31,6 +34,7 @@
       cfg[key] = value || DEFAULTS[key];
     });
     if (formatPhone(cfg.phone).length !== 12) cfg.phone = DEFAULTS.phone;
+    if (cfg.district === DEFAULTS.district) cfg.district = 'вашем районе';
     return cfg;
   }
 

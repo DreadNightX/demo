@@ -153,11 +153,100 @@ def render_credit(credit: dict) -> str:
     return '<span class="credit">%s</span>' % text
 
 
+def render_services(items: list) -> str:
+    """Выпадающий список услуг в форме. Нет данных — поле не показываем."""
+    names = []
+    for item in items:
+        if isinstance(item, dict):
+            name = str(item.get("service") or "").strip()
+        else:
+            name = str(item or "").strip()
+        if name and name not in names:
+            names.append(name)
+    if not names:
+        return ""
+    options = "\n".join('              <option>%s</option>' % esc(n) for n in names)
+    return (
+        '          <div class="field">\n'
+        '            <label for="f-service">Услуга</label>\n'
+        '            <select id="f-service" name="service">\n'
+        '              <option>Не знаю, нужна диагностика</option>\n'
+        "%s\n"
+        "            </select>\n"
+        "          </div>" % options
+    )
+
+
+def render_demo_banner(data: dict) -> str:
+    """Плашка сверху. Показывается, пока клиент не согласился: data["live"] = true её убирает."""
+    if data.get("live"):
+        return ""
+    who = esc(str(data.get("name") or data.get("slug") or ""))
+    lines = [
+        '<div class="demo-note" role="note">',
+        '  <div class="wrap">',
+        '    <b>Демо</b>',
+        '    <span>Так мог бы выглядеть сайт «%s». Цены, отзывы и график — пример,' % who,
+        '    в поиске страница не появится.</span>',
+        '  </div>',
+        '</div>',
+    ]
+    return "\n".join(lines)
+
+
+def render_demo_footer(data: dict) -> str:
+    """Пометка в футере: остаётся видимой и после согласия — сайт всё ещё на GitHub Pages."""
+    if data.get("live"):
+        return '<span class="demo-mark">демо-версия</span>'
+    return '<span class="demo-mark">демо · не для поиска</span>'
+
+
 def render_json_js(data: dict) -> str:
     """data.js: JSON внутри JS. «</» экранируем, чтобы данные не закрыли <script>."""
     payload = {k: v for k, v in data.items() if k in ("name", "district", "address", "phone", "hours")}
     raw = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
     return "window.DEMO_DATA = %s;\n" % raw
+
+
+# Значения, с которыми шаблон лежит в репозитории. Заменяются на данные клиента.
+TEMPLATE_VALUES = {
+    "ГАРАЖ 12": "name",
+    "Коптево": "district",
+    "ул. Коптевская, 26": "address",
+    "+7 (495) 120-45-67": "phone",
+    "пн–сб 9:00–21:00": "hours",
+    "tel:+74951204567": "tel",
+}
+
+
+def fill_placeholders(page: str, data: dict) -> str:
+    """Подставляет данные клиента прямо в разметку вместо значений-заглушек."""
+    tel = format_tel(data.get("phone"))
+    # если поля нет — не оставляем чужой адрес и чужие часы работы, а честно говорим «уточняется»
+    fallback = {
+        "name": data.get("slug") or "автосервис",
+        "district": "вашем районе",
+        "address": "адрес уточняется",
+        "phone": "+7 (000) 000-00-00",
+        "hours": "уточняйте по телефону",
+    }
+    for old, key in TEMPLATE_VALUES.items():
+        if key == "tel":
+            page = page.replace(old, "tel:" + tel)
+            continue
+        value = data.get(key) or fallback[key]
+        page = page.replace(old, esc(str(value)))
+    return page
+
+
+def format_tel(raw: str) -> str:
+    """Как в config.js: 8XXXXXXXXXX и XXXXXXXXXX приводим к +7XXXXXXXXXX."""
+    digits = re.sub(r"\D", "", str(raw or ""))
+    if len(digits) == 11 and digits[0] == "8":
+        digits = "7" + digits[1:]
+    elif len(digits) == 10:
+        digits = "7" + digits
+    return "+" + digits
 
 
 def build(slug: str, out_root: Path, base_url: str = "") -> Path:
@@ -175,22 +264,38 @@ def build(slug: str, out_root: Path, base_url: str = "") -> Path:
     head.append('<!-- %s | собрано new_demo.py -->' % esc(slug))
     page = page.replace("<!--HEAD-->", "\n".join(head))
 
+    page = page.replace("<!--SERVICES-->", render_services(data.get("services") or data.get("prices") or []))
+    page = page.replace("<!--DEMO-->", render_demo_banner(data))
+    page = page.replace("<!--DEMO-FOOT-->", render_demo_footer(data))
     page = page.replace("<!--PRICES-->", render_prices(data.get("prices") or []))
     page = page.replace("<!--REVIEWS-->", render_reviews(data.get("reviews") or []))
     page = page.replace("<!--FAQ-->", render_faq(data.get("faq") or []))
     page = page.replace("<!--CREDIT-->", render_credit(data.get("credit") or {}))
+    # Значения-заглушки из шаблона меняем уже в HTML: страница верна и без JS,
+    # а не «ГАРАЖ 12» до первой отрисовки. data.js остаётся — JS просто передёрнет те же данные.
+    page = fill_placeholders(page, data)
+
     # {name}/{district} в <title> и <meta description> подставляем ещё при сборке:
     # тогда превью ссылки в мессенджерах и title вкладки верны и без JS
     page = page.replace("{name}", esc(data.get("name") or slug))
     if data.get("district"):
         page = page.replace("{district}", esc(data["district"]))
     else:
-        page = page.replace(" в {district}", "").replace("{district}", "вашем городе")
+        page = page.replace(", {district}", "").replace("{district}", "вашем городе")
 
-    page = page.replace('data-endpoint=""', 'data-endpoint="%s"' % esc(safe_endpoint(data.get("form_endpoint"))))
-    page = page.replace('id="entry-form" novalidate', 'id="entry-form" novalidate data-slug="%s"' % esc(slug))
+    page = page.replace('data-endpoint=""', 'data-endpoint="%s"' % esc(safe_endpoint(data.get("form_endpoint"))), 1)
+    page = page.replace('data-slug=""', 'data-slug="%s"' % esc(slug), 1)
+    # рабочие дни (1..7, пн..вс) и сетка записи — необязательные поля JSON
+    days = data.get("days")
+    if isinstance(days, list) and days:
+        page = page.replace('data-days="1,2,3,4,5,6"', 'data-days="%s"' % esc(",".join(str(int(d)) for d in days)), 1)
+    slots = data.get("slots")
+    if isinstance(slots, list) and slots:
+        page = page.replace(
+            'data-slots="9:00,10:00,11:00,12:00,13:00,14:00,15:00,16:00,17:00,18:00"',
+            'data-slots="%s"' % esc(",".join(str(s) for s in slots)), 1)
 
-    if re.search(r"<!--(HEAD|PRICES|REVIEWS|FAQ|CREDIT)-->", page):
+    if re.search(r"<!--(HEAD|PRICES|REVIEWS|FAQ|CREDIT|DEMO|DEMO-FOOT)-->", page):
         fail("в шаблоне остались незаполненные маркеры — проверьте _templates/site/index.html")
 
     (out / "index.html").write_text(page, encoding="utf-8", newline="\n")
@@ -357,6 +462,7 @@ def build_index(target: Path = SITE_DIR, dry_run: bool = False) -> None:
                      % (esc(slug), esc(name), esc(where or slug)))
     if not items:
         items = ['    <li><span><code>пока пусто</code></span></li>']
+    target.mkdir(parents=True, exist_ok=True)
     (target / "index.html").write_text(LANDING % "\n".join(items), encoding="utf-8", newline="\n")
     print("%s обновлён: %d демо" % ((target / "index.html").relative_to(ROOT), len(items)))
     if dry_run or target != SITE_DIR:
@@ -378,8 +484,14 @@ def delete(slug: str, confirm: bool, per_repo: bool) -> None:
             shutil.rmtree(base)
             removed = True
             print("удалено: %s" % base.relative_to(ROOT))
+    # в режиме Actions сайта в git нет — удалять надо сам JSON, иначе CI соберёт его снова
+    source = CLIENTS / (slug + ".json")
+    if source.exists():
+        source.unlink()
+        removed = True
+        print("удалено: %s" % source.relative_to(ROOT))
     if removed:
-        git("add", "-A", "--", "docs", check=False)
+        git("add", "-A", "--", "docs", "clients", check=False)
         if git("diff", "--cached", "--name-only").stdout.strip():
             git("commit", "-m", "demo: удалить %s" % slug, check=False)
             git("push", "origin", "HEAD", check=False)
@@ -387,9 +499,10 @@ def delete(slug: str, confirm: bool, per_repo: bool) -> None:
                   "если данные чувствительные — чистите историю (см. README)." % slug)
         else:
             print("локальные файлы удалены; в git нечего коммитить")
-        build_index(dry_run=False)
+        if not WORKFLOW.exists():
+            build_index(dry_run=False)
     if not removed:
-        print("нечего удалять: docs/%s и dist/%s не найдены" % (slug, slug))
+        print("нечего удалять: clients/%s.json, docs/%s и dist/%s не найдены" % (slug, slug, slug))
     if per_repo:
         print("Отдельный репозиторий удаляется вручную: gh repo delete %s/demo-%s --yes" % (git_owner(), slug))
 
@@ -405,7 +518,7 @@ def main(argv: list) -> int:
 
     if args.command == "list":
         for path in sorted(CLIENTS.glob("*.json")):
-            built = "собран" if (SITE_DIR / path.stem).exists() else "не собран"
+            built = "собран" if (DIST / path.stem).exists() else "не собран"
             print("%-24s %s" % (path.stem, built))
         return 0
     if args.command == "index":

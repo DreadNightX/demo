@@ -103,12 +103,19 @@ def handler(event: dict, context) -> dict:
     if len(digits) < 10:
         return _reply(400, {"ok": False, "error": "phone"}, ORIGIN)
 
+    # Дату и время присылает браузер; на слово не верим — только печатаем как есть.
+    when_label = str(body.get("when") or "").strip()[:80]
+    if not when_label:
+        when_label = (str(body.get("date") or "?") + ", " + str(body.get("time") or "?"))[:80]
+
     text = "\n".join([
         "🔧 Новая заявка с демо",
         "Сайт: " + str(body.get("slug") or "?")[:120],
         "Телефон: " + phone,
         "Имя: " + str(body.get("name") or "—")[:60],
         "Машина: " + str(body.get("car") or "—")[:60],
+        "Услуга: " + str(body.get("service") or "—")[:80],
+        "Когда: " + when_label,
         "Проблема: " + str(body.get("issue") or "—")[:400],
         "Откуда пришёл: " + str(body.get("ref") or "прямой заход")[:200],
     ])

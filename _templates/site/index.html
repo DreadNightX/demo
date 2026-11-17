@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{name} — автосервис в {district}</title>
-<meta name="description" content="Автосервис в {district}: диагностика, ТО, ремонт ходовой и двигателя. Смета до начала работ, гарантия 12 месяцев. Запись по телефону.">
+<title>{name} — автосервис, {district}</title>
+<meta name="description" content="Автосервис, {district}: диагностика, ТО, ремонт ходовой и двигателя. Смета до начала работ, гарантия 12 месяцев. Запись по телефону.">
 <link rel="stylesheet" href="fonts.css">
 <link rel="icon" href="data:,">
 <!--HEAD-->
@@ -341,17 +341,34 @@
   .field{margin-bottom:14px}
   .field label{display:block;font-weight:700;font-size:13.5px;margin-bottom:6px;color:var(--ink)}
   .field label i{font-style:normal;color:var(--accent)}
-  .field input,.field textarea{
+  .field input,.field textarea,.field select{
     width:100%;background:#141519;border:1.5px solid var(--line-2);border-radius:8px;
     padding:12px 14px;font:inherit;color:var(--ink);
     transition:border-color .12s,box-shadow .12s;
   }
+  .field select{
+    -webkit-appearance:none;appearance:none;cursor:pointer;padding-right:38px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2382868F' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;
+  }
+  .field select option{background:#141519;color:var(--ink)}
   .field input::placeholder,.field textarea::placeholder{color:#6A6E77}
-  .field input:focus,.field textarea:focus{
+  .field input:focus,.field textarea:focus,.field select:focus{
     outline:none;border-color:var(--accent);
     box-shadow:0 0 0 3px rgba(255,106,43,.18),0 0 18px rgba(255,106,43,.15);
   }
   .field textarea{resize:vertical}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row2 .field{margin-bottom:14px}
+  .check{
+    display:flex;gap:10px;align-items:flex-start;margin:0 0 14px;
+    font-size:12.5px;line-height:1.5;color:var(--ink-2);cursor:pointer;
+  }
+  .check input{
+    flex:none;width:18px;height:18px;margin:1px 0 0;accent-color:var(--accent);cursor:pointer;
+  }
+  .check a{color:var(--steel);text-decoration:underline}
+  @media(max-width:479px){.row2{grid-template-columns:1fr;gap:0}}
   .field input[aria-invalid="true"]{border-color:var(--accent-deep)}
   .err{margin-top:6px;font-size:13px;color:var(--accent)}
   .ok{
@@ -371,6 +388,20 @@
   }
   .find a:hover{color:var(--accent);text-shadow:0 0 14px rgba(255,106,43,.5)}
   .find .muted{font-size:13px;color:var(--steel)}
+
+  /* ---------- плашка «это демо» ---------- */
+  .demo-note{
+    position:relative;z-index:2;
+    background:var(--accent-soft);border-bottom:1px solid #3B2A21;
+    color:#D8BBA9;font-size:12.5px;line-height:1.5;padding:9px 0;
+  }
+  .demo-note .wrap{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .demo-note b{
+    font-family:var(--disp);font-weight:400;font-size:11.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--accent);white-space:nowrap;
+  }
+  .demo-note span{color:#B39280}
+  .demo-mark{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--steel)}
 
   /* ---------- футер ---------- */
   .bottom{
@@ -436,6 +467,8 @@
 </style>
 </head>
 <body>
+
+<!--DEMO-->
 
 <header class="top">
   <div class="wrap">
@@ -645,18 +678,30 @@
     <div class="wrap">
       <div class="sec-head">
         <h2>Записаться на осмотр</h2>
-        <p>Оставьте номер — перезвоним в течение 15 минут в рабочее время.</p>
+        <p>Выберите услугу, дату и время — перезвоним в течение 15 минут в рабочее время, чтобы подтвердить.</p>
       </div>
       <div class="entry">
-        <form class="card" id="entry-form" novalidate data-endpoint="">
+        <form class="card" id="entry-form" novalidate
+              data-endpoint="" data-slug="" data-days="1,2,3,4,5,6" data-slots="9:00,10:00,11:00,12:00,13:00,14:00,15:00,16:00,17:00,18:00">
           <div class="hp" aria-hidden="true">
             <label for="f-company">Компания</label>
             <input id="f-company" name="company" type="text" tabindex="-1" autocomplete="off">
           </div>
           <div class="field">
             <label for="f-phone">Телефон <i aria-hidden="true">*</i></label>
-            <input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder="+7 900 000-00-00">
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7 900 000-00-00">
             <p class="err" id="f-phone-err" hidden></p>
+          </div>
+          <!--SERVICES-->
+          <div class="row2">
+            <div class="field">
+              <label for="f-date">Дата</label>
+              <select id="f-date" name="date"></select>
+            </div>
+            <div class="field">
+              <label for="f-time">Время</label>
+              <select id="f-time" name="time"></select>
+            </div>
           </div>
           <div class="field">
             <label for="f-name">Имя</label>
@@ -670,17 +715,22 @@
             <label for="f-issue">Что беспокоит</label>
             <textarea id="f-issue" name="issue" rows="3" placeholder="Стук при торможении, скрип, течь…"></textarea>
           </div>
+          <label class="check" for="f-consent">
+            <input id="f-consent" name="consent" type="checkbox" checked>
+            <span>Согласен на обработку персональных данных: телефон и описание поломки нужны,
+            чтобы перезвонить и записать на ремонт.</span>
+          </label>
           <p class="ok" id="entry-ok" hidden>Заявка принята, перезвоним в течение 15 минут.</p>
           <p class="err" id="entry-err" hidden role="alert"></p>
           <button class="btn primary" id="entry-btn" type="submit">Записаться</button>
-          <p class="fine">Нажимая кнопку, вы соглашаетесь на звонок по указанному номеру. Ничего лишнего не присылаем.</p>
+          <p class="fine">Перезваниваем в рабочее время, обычно в течение 15 минут. Если удобнее — просто позвоните: <a data-field="phone" href="tel:+74951204567">+7 (495) 120-45-67</a>.</p>
         </form>
         <div class="card find">
           <b>Как нас найти</b>
           <p data-field="address">ул. Коптевская, 26</p>
           <p><span data-field="hours">пн–сб 9:00–21:00</span></p>
           <p><a data-field="phone" href="tel:+74951204567">+7 (495) 120-45-67</a></p>
-          <p class="muted">Мы в <span data-field="district">Коптево</span> — рядом с домом, без заезда на другой конец города.</p>
+          <p class="muted"><span data-field="district">Коптево</span> — рядом с домом, без заезда на другой конец города.</p>
         </div>
       </div>
     </div>
@@ -691,6 +741,7 @@
   <div class="wrap">
     <span><b data-field="name">ГАРАЖ 12</b>, <span id="year">2026</span></span>
     <a data-field="phone" href="tel:+74951204567">+7 (495) 120-45-67</a>
+    <!--DEMO-FOOT-->
     <!--CREDIT-->
   </div>
 </footer>
