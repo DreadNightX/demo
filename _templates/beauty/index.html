@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
+
+  <title>Салон красоты</title>
+  <meta name="description" id="meta-description" content="">
+  <meta name="author" id="meta-author" content="">
+  <meta name="theme-color" id="meta-theme" content="#F6F2EC">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="og-title" content="">
+  <meta property="og:description" id="og-description" content="">
+  <meta property="og:image" id="og-image" content="">
+  <meta property="og:site_name" id="og-site-name" content="">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="tw-title" content="">
+  <meta name="twitter:description" id="tw-description" content="">
+  <meta name="twitter:image" id="tw-image" content="">
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/favicon.svg">
+
+  <link rel="preload" href="assets/fonts/prata-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/prata-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Перейти к содержанию</a>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner container">
+      <a class="brand" href="#top" aria-label="На главную">
+        <span class="brand__mark" aria-hidden="true"><i></i></span>
+        <span class="brand__text" data-bind="name"></span>
+      </a>
+
+      <nav class="nav" aria-label="Основная навигация">
+        <ul class="nav__list" id="nav-list"></ul>
+      </nav>
+
+      <div class="site-header__actions">
+        <a class="site-header__phone" id="header-phone" href="#contacts" hidden></a>
+        <a class="btn btn--primary site-header__cta" href="#booking" data-scroll-to="booking">
+          <span>Записаться</span>
+        </a>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Открыть меню">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <div class="mobile-menu__inner">
+      <nav aria-label="Мобильная навигация">
+        <ul class="mobile-menu__list" id="mobile-nav-list"></ul>
+      </nav>
+      <div class="mobile-menu__footer" id="mobile-menu-footer"></div>
+    </div>
+  </div>
+
+  <main id="main">
+    <span id="top" class="anchor"></span>
+
+    <!-- HERO -->
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <div class="container hero__inner">
+        <div class="hero__grid">
+          <div class="hero__content">
+            <p class="hero__eyebrow">
+              <span class="hero__eyebrow-line" aria-hidden="true"></span>
+              <span data-bind="hero-eyebrow"></span>
+            </p>
+
+            <h1 class="hero__title" id="hero-title">
+              <span class="hero__title-line" data-bind="hero-title"></span>
+              <span class="hero__title-line hero__title-line--accent" data-bind="hero-accent"></span>
+            </h1>
+
+            <p class="hero__lead" data-bind="hero-lead"></p>
+
+            <div class="hero__actions">
+              <a class="btn btn--primary btn--lg" href="#booking" data-scroll-to="booking">
+                <span id="hero-cta-label">Записаться</span>
+                <svg class="btn__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 12h15M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+              <a class="link-underline" href="#services" data-scroll-to="services">
+                <span>Услуги и цены</span>
+              </a>
+            </div>
+
+            <dl class="hero__facts" id="hero-facts"></dl>
+          </div>
+
+          <div class="hero__media">
+            <div class="hero__frame" aria-hidden="true"></div>
+            <figure class="hero__figure">
+              <img id="hero-image" src="assets/hero.jpg" alt="" width="853" height="1067" decoding="async" fetchpriority="high">
+              <figcaption class="hero__caption" id="hero-caption"></figcaption>
+            </figure>
+            <p class="hero__vertical" id="hero-vertical" aria-hidden="true"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track" id="ticker-track"></div>
+    </div>
+
+    <!-- ABOUT -->
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <div class="container about__grid">
+        <div class="about__media">
+          <figure class="about__figure reveal">
+            <img id="about-image" src="assets/salon.jpg" alt="" width="853" height="1067" loading="lazy" decoding="async">
+          </figure>
+          <figure class="about__detail">
+            <img id="about-detail" src="assets/salon-detail.jpg" alt="" width="1100" height="732" loading="lazy" decoding="async">
+          </figure>
+          <div class="about__badge" aria-hidden="true">
+            <span id="about-badge"></span>
+          </div>
+        </div>
+
+        <div class="about__content">
+          <p class="eyebrow reveal"><span class="eyebrow__num">01</span><span data-bind="about-eyebrow"></span></p>
+          <h2 class="section-title reveal" id="about-title" data-bind="about-title"></h2>
+          <div class="about__text reveal" id="about-text"></div>
+          <div class="about__signature reveal" id="about-signature"></div>
+          <dl class="stats reveal" id="about-stats"></dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="section section--paper services" id="services" aria-labelledby="services-title">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow reveal"><span class="eyebrow__num">02</span><span data-bind="services-eyebrow"></span></p>
+            <h2 class="section-title reveal" id="services-title" data-bind="services-title"></h2>
+          </div>
+          <p class="section-head__note reveal" data-bind="services-note"></p>
+        </div>
+
+        <div class="services__body">
+          <div class="services__media reveal" id="services-media" aria-hidden="true">
+            <div class="services__frame" id="services-frame"></div>
+            <div class="services__caption">
+              <span class="services__caption-name" id="services-caption-name"></span>
+              <span class="services__caption-price" id="services-caption-price"></span>
+            </div>
+          </div>
+          <ul class="services__list" id="services-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADVANTAGES -->
+    <section class="section advantages" id="advantages" aria-labelledby="advantages-title">
+      <div class="container">
+        <div class="advantages__head">
+          <p class="eyebrow eyebrow--light reveal"><span class="eyebrow__num">03</span><span data-bind="advantages-eyebrow"></span></p>
+          <h2 class="advantages__title reveal" id="advantages-title" data-bind="advantages-title"></h2>
+        </div>
+        <ul class="advantages__list" id="advantages-list"></ul>
+      </div>
+    </section>
+
+    <!-- MASTERS -->
+    <section class="section masters" id="masters" aria-labelledby="masters-title">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow reveal"><span class="eyebrow__num">04</span><span data-bind="masters-eyebrow"></span></p>
+            <h2 class="section-title reveal" id="masters-title" data-bind="masters-title"></h2>
+          </div>
+          <p class="section-head__note reveal" data-bind="masters-note"></p>
+        </div>
+        <ul class="masters__grid" id="masters-list"></ul>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="section section--paper gallery" id="gallery" aria-labelledby="gallery-title">
+      <div class="container">
+        <div class="section-head section-head--center">
+          <p class="eyebrow reveal"><span class="eyebrow__num">05</span><span data-bind="gallery-eyebrow"></span></p>
+          <h2 class="section-title reveal" id="gallery-title" data-bind="gallery-title"></h2>
+          <p class="section-head__note reveal" data-bind="gallery-note"></p>
+        </div>
+        <div class="gallery__grid" id="gallery-grid"></div>
+      </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section class="section reviews" id="reviews" aria-labelledby="reviews-title">
+      <div class="container reviews__inner">
+        <p class="eyebrow reveal"><span class="eyebrow__num">06</span><span data-bind="reviews-eyebrow"></span></p>
+        <h2 class="section-title reveal" id="reviews-title" data-bind="reviews-title"></h2>
+
+        <div class="reviews__stage reveal" id="reviews-stage">
+          <div class="reviews__viewport">
+            <div class="reviews__track" id="reviews-track"></div>
+          </div>
+
+          <div class="reviews__controls" id="reviews-controls">
+            <button class="round-btn" type="button" id="reviews-prev" aria-label="Предыдущий отзыв">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="reviews__meta">
+              <span id="reviews-counter">01 / 01</span>
+              <span class="reviews__progress"><i id="reviews-progress"></i></span>
+            </div>
+            <button class="round-btn" type="button" id="reviews-next" aria-label="Следующий отзыв">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 12h15M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOOKING -->
+    <section class="section booking" id="booking" aria-labelledby="booking-title">
+      <div class="container">
+        <div class="booking__card reveal">
+          <div class="booking__media">
+            <img id="booking-image" src="assets/booking.jpg" alt="" width="800" height="1067" loading="lazy" decoding="async">
+            <div class="booking__media-overlay">
+              <p class="booking__media-note" data-bind="booking-note"></p>
+              <p class="booking__media-phone" id="booking-phone"></p>
+            </div>
+          </div>
+
+          <div class="booking__body">
+            <p class="eyebrow"><span class="eyebrow__num">07</span><span data-bind="booking-eyebrow"></span></p>
+            <h2 class="section-title" id="booking-title" data-bind="booking-title"></h2>
+            <p class="booking__text" data-bind="booking-text"></p>
+
+            <form class="form" id="booking-form" novalidate>
+              <div class="form__row">
+                <label class="field" for="field-name">
+                  <span class="field__label">Имя</span>
+                  <input class="field__input" type="text" id="field-name" name="name" autocomplete="name" placeholder="Как к вам обращаться" required>
+                  <span class="field__error" data-error-for="name"></span>
+                </label>
+                <label class="field" for="field-phone">
+                  <span class="field__label">Телефон</span>
+                  <input class="field__input" type="tel" id="field-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" required>
+                  <span class="field__error" data-error-for="phone"></span>
+                </label>
+              </div>
+
+              <div class="form__row">
+                <label class="field" for="field-service">
+                  <span class="field__label">Услуга</span>
+                  <span class="select">
+                    <select class="field__input field__select" id="field-service" name="service" required>
+                      <option value="" selected disabled>Выберите услугу</option>
+                    </select>
+                  </span>
+                  <span class="field__error" data-error-for="service"></span>
+                </label>
+                <label class="field" for="field-date">
+                  <span class="field__label">Желаемая дата</span>
+                  <input class="field__input" type="date" id="field-date" name="date" required>
+                  <span class="field__error" data-error-for="date"></span>
+                </label>
+              </div>
+
+              <label class="field field--full" for="field-comment">
+                <span class="field__label">Комментарий <span class="field__optional">— необязательно</span></span>
+                <input class="field__input" type="text" id="field-comment" name="comment" placeholder="Пожелания, удобное время">
+              </label>
+
+              <button class="btn btn--primary btn--lg form__submit" type="submit" id="form-submit">
+                <span class="form__submit-label">Отправить заявку</span>
+                <span class="form__spinner" aria-hidden="true"></span>
+              </button>
+
+              <p class="form__hint">Нажимая кнопку, вы соглашаетесь на обработку персональных данных.</p>
+              <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+            </form>
+
+            <div class="form-success" id="form-success" hidden>
+              <span class="form-success__icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 12.5l5 5L20 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <h3 class="form-success__title" id="form-success-title"></h3>
+              <p class="form-success__text" id="form-success-text"></p>
+              <button class="link-underline" type="button" id="form-reset">
+                <span>Отправить ещё одну заявку</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACTS -->
+    <section class="section contacts" id="contacts" aria-labelledby="contacts-title">
+      <div class="container contacts__grid">
+        <div class="contacts__info">
+          <p class="eyebrow reveal"><span class="eyebrow__num">08</span><span data-bind="contacts-eyebrow"></span></p>
+          <h2 class="section-title reveal" id="contacts-title" data-bind="contacts-title"></h2>
+          <dl class="contacts__list" id="contacts-list"></dl>
+          <div class="contacts__socials" id="contacts-socials"></div>
+          <a class="btn btn--primary btn--lg reveal" href="#booking" data-scroll-to="booking">
+            <span>Записаться на визит</span>
+            <svg class="btn__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 12h15M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="contacts__map reveal" id="contacts-map-wrap">
+          <div class="contacts__map-art" aria-hidden="true">
+            <div class="contacts__map-grid"></div>
+            <div class="contacts__map-pin"><span></span></div>
+          </div>
+          <div class="contacts__map-caption">
+            <span class="contacts__map-label" id="contacts-map-label"></span>
+            <span class="contacts__map-address" id="contacts-map-address"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <span class="footer__wordmark" data-bind="name"></span>
+          <p class="footer__slogan" data-bind="slogan"></p>
+        </div>
+        <div class="footer__columns" id="footer-columns"></div>
+      </div>
+
+      <div class="footer__bottom">
+        <p class="footer__legal" id="footer-legal"></p>
+        <a class="footer__up" href="#top" aria-label="Наверх">
+          <span>Наверх</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 20V5M6 11l6-6 6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="mobile-cta" id="mobile-cta">
+    <a class="mobile-cta__call" id="mobile-cta-call" href="tel:" aria-label="Позвонить">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <a class="mobile-cta__book" href="#booking" data-scroll-to="booking">Записаться</a>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр фотографии" hidden>
+    <button class="lightbox__close" type="button" id="lightbox-close" aria-label="Закрыть">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button class="lightbox__nav lightbox__nav--prev" type="button" id="lightbox-prev" aria-label="Предыдущее фото">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <figure class="lightbox__figure">
+      <img id="lightbox-image" alt="Фотография галереи">
+      <figcaption class="lightbox__caption">
+        <span id="lightbox-caption"></span>
+        <span id="lightbox-counter"></span>
+      </figcaption>
+    </figure>
+    <button class="lightbox__nav lightbox__nav--next" type="button" id="lightbox-next" aria-label="Следующее фото">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 12h15M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <noscript>
+    <div class="noscript">Для отображения сайта включите JavaScript в настройках браузера.</div>
+  </noscript>
+
+  <script src="config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

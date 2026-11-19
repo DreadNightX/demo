@@ -22,9 +22,11 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent
-TEMPLATE = ROOT / "_templates" / "site"
+TEMPLATES = ROOT / "_templates"
+TEMPLATE = TEMPLATES / "site"       # шаблон автосервиса: остаётся по умолчанию
 CLIENTS = ROOT / "clients"
 DIST = ROOT / "dist"
 SITE_DIR = ROOT / "docs"          # публикуемая папка: GitHub Pages из ветки умеет только / или /docs
@@ -32,6 +34,16 @@ WORKFLOW = ROOT / ".github" / "workflows" / "pages.yml"
 NOINDEX = '<meta name="robots" content="noindex, nofollow">'
 
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,40}$")
+
+# Какой шаблон брать. Салон красоты собирается по _templates/beauty, все
+# остальные ниши (автосервис, шиномонтаж, ремонт компьютеров) — по _templates/site.
+# Шаблон можно задать явно полем "template" в clients/<slug>.json; если поля
+# нет — он выбирается по нише (поле "niche").
+NICHE_TEMPLATE = {"beauty": "beauty"}
+# старые файлы клиентов (без поля niche) узнаём по префиксу слага
+SLUG_TEMPLATE = {"beauty": "beauty"}
+DEFAULT_TEMPLATE = "site"
+TEMPLATE_TITLES = {"site": "автосервис", "beauty": "салон красоты"}
 
 # Заглушки на случай, если в JSON нет прайса или отзывов: демо должно выглядеть целым.
 DEFAULT_PRICES = [
@@ -250,8 +262,38 @@ def format_tel(raw: str) -> str:
     return "+" + digits
 
 
+def resolve_template(data: dict, slug: str = "") -> str:
+    """Каким шаблоном собирать этого клиента: "site" или "beauty".
+
+    Порядок: явное поле "template", затем ниша, затем префикс слага.
+    Префикс нужен для файлов, собранных до появления поля "niche": карточка,
+    сохранённая раньше, не должна после публикации поменять шаблон.
+    """
+    explicit = str(data.get("template") or "").strip().lower()
+    if explicit in TEMPLATE_TITLES:
+        return explicit
+    niche = str(data.get("niche") or "").strip().lower()
+    if niche in NICHE_TEMPLATE:
+        return NICHE_TEMPLATE[niche]
+    for prefix, template in SLUG_TEMPLATE.items():
+        if slug.startswith(prefix + "-"):
+            return template
+    return DEFAULT_TEMPLATE
+
+
 def build(slug: str, out_root: Path, base_url: str = "") -> Path:
+    """Собирает демо нужным шаблоном и возвращает папку сборки.
+
+    Салон красоты собирается по _templates/beauty (данные в config.js),
+    остальные ниши — по _templates/site (данные в index.html + data.js).
+    """
     data = load_client(slug)
+    if resolve_template(data, slug) == "beauty":
+        return build_beauty(slug, out_root, data)
+    return build_auto(slug, out_root, data, base_url)
+
+
+def build_auto(slug: str, out_root: Path, data: dict, base_url: str = "") -> Path:
     out = out_root / slug
     if out.exists():
         shutil.rmtree(out)
@@ -317,6 +359,279 @@ def build(slug: str, out_root: Path, base_url: str = "") -> Path:
     # тесты в публикуемом сайте не нужны
     for junk in ("config.test.js", "app.test.js"):
         (out / junk).unlink(missing_ok=True)
+    return out
+
+
+# ---------------------------------------------------------------- шаблон салона
+# Второй шаблон — для салонов красоты. Он не подставляет данные в разметку:
+# сборщик копирует папку целиком и перезаписывает config.js, из которого
+# js/main.js рисует страницу. Поэтому контракт clients/<slug>.json не меняется,
+# а внутри просто появляется поле "template": "beauty".
+BEAUTY_TEMPLATE = TEMPLATES / "beauty"
+
+_OSM_DAYS = ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
+_DAYS_RU = {"Mo": "пн", "Tu": "вт", "We": "ср", "Th": "чт", "Fr": "пт", "Sa": "сб", "Su": "вс"}
+_HOURS_RE = re.compile(r"^\s*([A-Za-z,\-]*)\s*(\d{1,2}:\d{2})\s*[-\u2013]\s*(\d{1,2}:\d{2})\s*$")
+
+
+def _days_from_token(token: str) -> set:
+    days: set = set()
+    for chunk in str(token or "").split(","):
+        chunk = chunk.strip()
+        if not chunk or chunk.upper() == "PH":
+            continue
+        if "-" in chunk:
+            first_raw, _, last_raw = chunk.partition("-")
+            first = first_raw.strip().capitalize()
+            last = last_raw.strip().capitalize()
+            if first in _OSM_DAYS and last in _OSM_DAYS:
+                start, stop = _OSM_DAYS.index(first), _OSM_DAYS.index(last)
+                if start <= stop:
+                    days.update(_OSM_DAYS[start:stop + 1])
+        else:
+            day = chunk.capitalize()
+            if day in _OSM_DAYS:
+                days.add(day)
+    return days
+
+
+def _days_ru(days: set) -> str:
+    if not days:
+        return ""
+    if days == set(_OSM_DAYS):
+        return "ежедневно"
+    order = [day for day in _OSM_DAYS if day in days]
+    parts: list = []
+    index = 0
+    while index < len(order):
+        last = index
+        while (last + 1 < len(order)
+               and _OSM_DAYS.index(order[last + 1]) == _OSM_DAYS.index(order[last]) + 1):
+            last += 1
+        if last - index >= 2:
+            parts.append(_DAYS_RU[order[index]] + "\u2013" + _DAYS_RU[order[last]])
+        else:
+            parts.extend(_DAYS_RU[day] for day in order[index:last + 1])
+        index = last + 1
+    return ", ".join(parts)
+
+
+def hours_ru(raw: object) -> str:
+    """'Mo-Su 10:00-21:00' -> 'ежедневно 10:00-21:00' (с длинным тире).
+
+    OSM хранит часы машинным синтаксисом, клиенту такое показывать нельзя.
+    Незнакомый формат возвращаем как есть: соврать про график хуже, чем
+    показать исходную строку.
+    """
+    text = str(raw or "").strip()
+    if not text:
+        return ""
+    parts: list = []
+    for chunk in text.split(";"):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if chunk.lower() in ("24/7", "24/7 open"):
+            parts.append("круглосуточно")
+            continue
+        match = _HOURS_RE.match(chunk)
+        if not match:
+            parts.append(chunk)
+            continue
+        token, start, end = match.group(1), match.group(2), match.group(3)
+        label = _days_ru(_days_from_token(token)) if token else "ежедневно"
+        parts.append(("%s %s\u2013%s" % (label, start, end)).strip())
+    return ", ".join(parts)
+
+
+def _as_float(value: object) -> float:
+    try:
+        return float(str(value).replace(",", "."))
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _as_int(value: object) -> int:
+    try:
+        return int(float(str(value)))
+    except (TypeError, ValueError):
+        return 0
+
+
+def beauty_seo(data: dict) -> dict:
+    name = str(data.get("name") or "").strip() or "Салон красоты"
+    district = str(data.get("district") or "").strip()
+    where = ", " + district if district else ""
+    return {
+        "title": "%s — салон красоты%s" % (name, where),
+        "description": "%s — салон красоты%s. Запись по телефону." % (name, where),
+        "locale": "ru_RU",
+        "ogImage": "assets/og-image.jpg",
+    }
+
+
+def render_beauty_config(slug: str, data: dict) -> str:
+    """config.js для шаблона салона: только реальные данные лида.
+
+    Цены, мастера, отзывы и «о салоне» не выдумываются: без данных шаблон сам
+    прячет эти секции. Выдуманный прайс в демо — это обещание клиенту, которого
+    он не давал.
+    """
+    name = str(data.get("name") or slug).strip()
+    phone = str(data.get("phone") or "").strip()
+    address = str(data.get("address") or "").strip()
+    district = str(data.get("district") or "").strip()
+    hours = hours_ru(data.get("hours"))
+    live = bool(data.get("live"))
+
+    # В OSM город часто записан и в отдельном теге, и внутри адреса
+    # («Москва, ул. Свободы»). Без этой проверки в демо получается
+    # «Москва, ул. Свободы, 61, Москва».
+    district_extra = ""
+    if district and district.lower() not in address.lower():
+        district_extra = district
+
+    contacts: dict = {"phone": phone}
+    email = str(data.get("email") or "").strip()
+    if email and "@" in email:
+        contacts["email"] = email
+    if address:
+        contacts["address"] = address
+    if district:
+        contacts["district"] = district
+    if hours:
+        contacts["workingHours"] = hours
+    if address:
+        # Ссылка на поиск по адресу, а не на точку организации: координат
+        # в карточке может не быть, а придумывать чужую метку нельзя.
+        text = address + (", " + district_extra if district_extra else "")
+        contacts["mapUrl"] = "https://yandex.ru/maps/?text=" + quote(text)
+
+    hero: dict = {"title": name, "cta": "Записаться", "image": "assets/hero.jpg"}
+    if district_extra and address:
+        hero["eyebrow"] = district_extra + " · " + address
+    elif address:
+        hero["eyebrow"] = address
+    facts: list = []
+    rating = _as_float(data.get("rating"))
+    if rating > 0:
+        facts.append({"value": ("%.1f" % rating).replace(".", ","), "label": "рейтинг"})
+    reviews = _as_int(data.get("reviews_count"))
+    if reviews > 0:
+        # 25202 без разрядов читается как опечатка; неразрывный пробел
+        # в шаблоне выглядит как обычный.
+        facts.append({"value": "{:,}".format(reviews).replace(",", " "), "label": "отзывов"})
+    if facts:
+        hero["facts"] = facts
+
+    social: dict = {}
+    telegram = str(data.get("telegram") or "").strip()
+    if telegram.startswith(("http://", "https://")):
+        social["telegram"] = telegram
+    elif telegram.startswith("@"):
+        social["telegram"] = telegram
+
+    config = {
+        "name": name,
+        "logo": {"text": name},
+        "hero": hero,
+        "form": {"demo": True, "endpoint": "", "method": "POST"},
+        "contacts": contacts,
+        "social": social,
+        "seo": beauty_seo(data),
+        "footer": {
+            "legal": "" if live else
+            "Демо-макет: страница не для поиска, фотографии — пример оформления"
+        },
+    }
+    head = (
+        "/* config.js — данные клиента. Файл собран new_demo.py из clients/%s.json\n"
+        "   и при следующей сборке будет перезаписан. Правьте JSON, а не этот файл. */\n"
+    ) % slug
+    return head + "window.SITE_CONFIG = " + json.dumps(
+        config, ensure_ascii=False, indent=2
+    ).replace("</", "<\\/") + ";\n"
+
+
+BEAUTY_NOTE_CSS = """
+  /* плашка «демо»: добавлена сборщиком, в самом шаблоне её нет */
+  .demo-note{position:fixed;left:14px;bottom:14px;z-index:120;display:inline-flex;
+    gap:8px;align-items:center;max-width:calc(100vw - 28px);padding:8px 14px;
+    border-radius:999px;background:rgba(26,22,19,.86);color:#F6F2EC;
+    font:12px/1.35 Inter,Arial,sans-serif;letter-spacing:.01em;
+    box-shadow:0 8px 28px rgba(0,0,0,.32);pointer-events:none;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .demo-note b{font-weight:600;font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:#D8B98A}
+  @media(max-width:900px){.demo-note{bottom:78px}}
+"""
+
+
+def build_beauty(slug: str, out_root: Path, data: dict) -> Path:
+    """Сборка демо салона красоты по _templates/beauty."""
+    if not BEAUTY_TEMPLATE.exists():
+        fail("нет шаблона салона: %s" % BEAUTY_TEMPLATE)
+    out = out_root / slug
+    if out.exists():
+        shutil.rmtree(out)
+    shutil.copytree(BEAUTY_TEMPLATE, out)
+
+    page = (out / "index.html").read_text(encoding="utf-8")
+
+    head: list = []
+    if data.get("noindex", True):
+        head.append(NOINDEX)
+    head.append("<!-- %s | собрано new_demo.py -->" % esc(slug))
+    head.append("<style>%s</style>" % BEAUTY_NOTE_CSS)
+    page = page.replace(
+        '<meta name="format-detection" content="telephone=no">',
+        '<meta name="format-detection" content="telephone=no">\n  ' + "\n  ".join(head),
+        1,
+    )
+
+    if not data.get("live"):
+        page = page.replace(
+            "<body>",
+            '<body>\n  <div class="demo-note" role="note"><b>Демо</b>'
+            "<span>так мог бы выглядеть ваш сайт · в поиске не появится</span></div>",
+            1,
+        )
+
+    # title и description дублируем в статику: до отрисовки JS и в превью
+    # мессенджеров страница должна называться именем клиента, а не «Салон красоты».
+    seo = beauty_seo(data)
+    page = page.replace("<title>Салон красоты</title>", "<title>%s</title>" % esc(seo["title"]), 1)
+    page = page.replace(
+        '<meta name="description" id="meta-description" content="">',
+        '<meta name="description" id="meta-description" content="%s">' % esc(seo["description"]),
+        1,
+    )
+    page = page.replace(
+        '<meta property="og:title" id="og-title" content="">',
+        '<meta property="og:title" id="og-title" content="%s">' % esc(seo["title"]),
+        1,
+    )
+
+    config_js = render_beauty_config(slug, data)
+    (out / "config.js").write_text(config_js, encoding="utf-8", newline="\n")
+
+    # ?v=<хеш> на config.js, main.js и style.css: GitHub Pages кэширует файлы
+    # на 10 минут, без этого обновлённое демо открывается старым.
+    digest = hashlib.sha1(
+        config_js.encode("utf-8")
+        + (out / "js" / "main.js").read_bytes()
+        + (out / "style.css").read_bytes()
+    ).hexdigest()[:10]
+    page = page.replace('<script src="config.js"></script>',
+                        '<script src="config.js?v=%s"></script>' % digest, 1)
+    page = page.replace('<script src="js/main.js"></script>',
+                        '<script src="js/main.js?v=%s"></script>' % digest, 1)
+    page = page.replace('<link rel="stylesheet" href="style.css">',
+                        '<link rel="stylesheet" href="style.css?v=%s">' % digest, 1)
+
+    (out / "index.html").write_text(page, encoding="utf-8", newline="\n")
+    # README шаблона в публикуемом сайте не нужен
+    (out / "README.md").unlink(missing_ok=True)
     return out
 
 
@@ -532,6 +847,8 @@ def new_client(slug: str) -> None:
     skeleton = {
         "slug": slug,
         "name": "",
+        # "beauty" — сайт салона красоты, "" — сайт мастерской
+        "template": "",
         "district": "",
         "address": "",
         "phone": "",
@@ -551,6 +868,7 @@ def new_client(slug: str) -> None:
     print("создан: %s" % path.relative_to(ROOT))
     print("заполните name, phone, district, address, hours и prices — и запустите:")
     print("  python new_demo.py publish %s" % slug)
+    print('для салона красоты добавьте "template": "beauty" и запустите build заново')
 
 
 def main(argv: list) -> int:
